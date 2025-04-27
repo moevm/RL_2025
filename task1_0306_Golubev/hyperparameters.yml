@@ -1,0 +1,13 @@
+env_id: CartPole-v1
+replay_memory_size: 100000
+mini_batch_size: 64
+epsilon_init: 0.3
+epsilon_decay: 0.9995
+epsilon_min: 0.01
+network_sync_rate: 100
+alpha: 0.001
+gamma: 0.99
+stop_on_reward: 10000
+fc1_nodes: 128
+train_episodes: 600
+test_episodes: 20
