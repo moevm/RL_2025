@@ -1,8 +1,9 @@
 from nets import *
 import gymnasium as gym
-from gymnasium.wrappers import RecordVideo
 import matplotlib.pyplot as plt
 import time
+import numpy as np
+import torch.optim as optim
 
 
 class PPOAgent:
