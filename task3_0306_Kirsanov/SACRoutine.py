@@ -55,10 +55,10 @@ class SoftQNetwork(nn.Module):
         self.net = nn.Sequential(
             layer_init(nn.Linear(state_dim, hidden_dim)),
             nn.ReLU(),
-            layer_init(nn.Linear(hidden_dim, hidden_dim)),
-            nn.ReLU(),
-            layer_init(nn.Linear(hidden_dim, hidden_dim)),
-            nn.ReLU(),
+            # layer_init(nn.Linear(hidden_dim, hidden_dim)),
+            # nn.ReLU(),
+            # layer_init(nn.Linear(hidden_dim, hidden_dim)),
+            # nn.ReLU(),
             layer_init(nn.Linear(hidden_dim, hidden_dim)),
             nn.ReLU(),
             layer_init(nn.Linear(hidden_dim, action_dim))
@@ -75,8 +75,8 @@ class Actor(nn.Module):
         self.net = nn.Sequential(
             layer_init(nn.Linear(state_dim, hiddenSize)),
             nn.ReLU(),
-            layer_init(nn.Linear(hiddenSize, hiddenSize)),
-            nn.ReLU(),
+            # layer_init(nn.Linear(hiddenSize, hiddenSize)),
+            # nn.ReLU(),
             layer_init(nn.Linear(hiddenSize, hiddenSize)),
             nn.ReLU(),
             layer_init(nn.Linear(hiddenSize, action_dim))
@@ -114,24 +114,29 @@ parser.add_argument('--LIDAR', type=bool, default=True, help='If true use LIDAR 
 parser.add_argument('--seed', type=int, default=69, help='seed of the experiment')
 parser.add_argument('--cuda', type=bool, default=True, help='if toggled, cuda will be enabled by default')
 parser.add_argument('--video', type=bool, default=False, help='whether to capture videos of the agent performances (check out `videos` folder)')
-parser.add_argument('--steps_for_statistic', type=int, default=8000, help='steps for print statistic')
-
+#parser.add_argument('--steps_for_statistic', type=int, default=8000, help='steps for print statistic')
+parser.add_argument('--steps_for_statistic', type=int, default=800, help='steps for print statistic')
 
 
 #Параметры алгоритма
-parser.add_argument('--total_timesteps', type=int, default=5000000, help='total timesteps of the experiments')
-parser.add_argument('--buffer_size', type=int, default=int(1e6), help='the replay memory buffer size')
+#parser.add_argument('--total_timesteps', type=int, default=5000000, help='total timesteps of the experiments')
+parser.add_argument('--total_timesteps', type=int, default=50000, help='total timesteps of the experiments')
+#parser.add_argument('--buffer_size', type=int, default=int(1e6), help='the replay memory buffer size')
+parser.add_argument('--buffer_size', type=int, default=int(3000), help='the replay memory buffer size')
 parser.add_argument('--batch_size', type=int, default=64, help='the batch size of sample from the reply memory')
 parser.add_argument('--update_frequency', type=int, default=4, help='the frequency of training updates')
-parser.add_argument('--target_network_frequency', type=int, default=8000, help='the frequency of updates for the target networks')
-parser.add_argument('--learning_starts', type=int, default=2e4, help='timestep to start learning')
+#parser.add_argument('--target_network_frequency', type=int, default=8000, help='the frequency of updates for the target networks')
+parser.add_argument('--target_network_frequency', type=int, default=800, help='the frequency of updates for the target networks')
+#parser.add_argument('--learning_starts', type=int, default=2e4, help='timestep to start learning')
+parser.add_argument('--learning_starts', type=int, default=1500, help='timestep to start learning')
 
 ##Параметры сеток
 parser.add_argument('--gamma', type=float, default=0.99, help='the discount factor gamma')
-parser.add_argument('--tau', type=float, default=1.0, help='target smoothing coefficient (default: 1)')
+parser.add_argument('--tau', type=float, default=0.9, help='target smoothing coefficient (default: 1)')
 parser.add_argument('--policy_lr', type=float, default=3e-4, help='the learning rate of the policy network optimizer')
 parser.add_argument('--q_lr', type=float, default=3e-4, help='the learning rate of the Q network network optimizer')
 #Параметры автотюна alpha
+#parser.add_argument('--alpha', type=float, default=0.2, help='Entropy regularization coefficient')
 parser.add_argument('--alpha', type=float, default=0.2, help='Entropy regularization coefficient')
 parser.add_argument('--autotune', type=bool, default=True, help='automatic tuning of the entropy coefficient')
 parser.add_argument('--target-entropy-scale', type=float, default=0.89, help='coefficient for scaling the autotune entropy target')
@@ -213,6 +218,7 @@ if __name__ == "__main__":
         next_obs, reward, termination, _, _ = env.step(action)
 
         if (termination):
+            env.reset()
             reloads_counter += 1
 
         rb.push(obs, next_obs, action, reward, termination)
@@ -288,7 +294,7 @@ if __name__ == "__main__":
                     target_param.data.copy_(args.tau * param.data + (1 - args.tau) * target_param.data)
 
             if global_step % args.steps_for_statistic == 0:
-                print("SPS:", int(global_step / (time.time() - start_time)), "Reloads: ", reloads_counter)
+                print("SPS:", int(global_step / (time.time() - start_time)), "Reloads: ", reloads_counter, "Alpha:", alpha)
                 reloads_list.append(reloads_counter)
                 reloads_counter = 0
 
